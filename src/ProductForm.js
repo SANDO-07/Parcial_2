@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import axios from "axios";
 
 const ProductForm = ({ refreshProducts }) => {
     const [name, setName] = useState("");
@@ -9,17 +8,33 @@ const ProductForm = ({ refreshProducts }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        await axios.post("http://localhost:8081/api/products", {
-            name,
-            description,
-            price,
-            available,
-        });
-        refreshProducts(); // Llama a la función para refrescar la lista de productos
-        setName("");
-        setDescription("");
-        setPrice("");
-        setAvailable(false);
+        try {
+            const response = await fetch("http://localhost:8081/api/products", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name,
+                    description,
+                    price,
+                    available,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Error al agregar el producto");
+            }
+
+            await response.json(); // Si la API devuelve algo, puedes procesarlo aquí
+            refreshProducts(); // Llama a la función para refrescar la lista de productos
+            setName("");
+            setDescription("");
+            setPrice("");
+            setAvailable(false);
+        } catch (error) {
+            console.error("Error:", error);
+        }
     };
 
     return (
